@@ -608,11 +608,56 @@
         function handlePhotoUpload(event) {
             const file = event.target.files[0];
             if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select a valid image file (JPG, PNG, GIF)');
+                    return;
+                }
+                
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    return;
+                }
+                
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    document.getElementById('previewImage').src = e.target.result;
-                    document.getElementById('photoPreview').classList.remove('hidden');
-                    document.getElementById('photoUploadPrompt').classList.add('hidden');
+                    // Create an image element to resize if needed
+                    const img = new Image();
+                    img.onload = function() {
+                        // Create canvas to resize image if too large
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Set maximum dimensions
+                        const maxWidth = 800;
+                        const maxHeight = 600;
+                        let { width, height } = img;
+                        
+                        // Calculate new dimensions if image is too large
+                        if (width > maxWidth || height > maxHeight) {
+                            const ratio = Math.min(maxWidth / width, maxHeight / height);
+                            width *= ratio;
+                            height *= ratio;
+                        }
+                        
+                        // Set canvas size and draw resized image
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convert to data URL with good quality
+                        const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        
+                        // Display the photo
+                        document.getElementById('previewImage').src = resizedDataUrl;
+                        document.getElementById('photoPreview').classList.remove('hidden');
+                        document.getElementById('photoUploadPrompt').classList.add('hidden');
+                        
+                        // Store the processed image data for email
+                        window.uploadedPhotoData = resizedDataUrl;
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             }
@@ -706,13 +751,26 @@
         }
 
         function sendRegistrationToBusinessEmail(refId, firstName, lastName, email, phone, address, dob, contactMethod) {
-            // Get photo data
+            // Get photo data - use the processed photo data
             let photoData = 'Not uploaded';
             let photoStatus = 'Not uploaded';
-            const previewImage = document.getElementById('previewImage');
-            if (!document.getElementById('photoPreview').classList.contains('hidden') && previewImage.src) {
-                photoData = previewImage.src; // This contains the base64 data URL
-                photoStatus = 'PHOTO ATTACHED - Ready to view and save';
+            let photoInstructions = '';
+            
+            if (window.uploadedPhotoData) {
+                photoData = window.uploadedPhotoData; // This contains the processed base64 data URL
+                photoStatus = '📸 REAL CUSTOMER PHOTO ATTACHED';
+                photoInstructions = `
+🖼️ CUSTOMER PHOTO PROCESSING:
+1. Copy the entire data URL below (starts with "data:image/jpeg;base64,")
+2. Paste it in a new browser tab address bar
+3. Press Enter to view the full-resolution photo
+4. Right-click and "Save image as..." to save for loyalty card printing
+5. Use this photo for the physical loyalty card
+
+📸 PHOTO DATA (Copy this entire line):
+${photoData}
+
+`;
             }
             
             // Get signature data
@@ -755,32 +813,35 @@ Registration Date: ${new Date().toLocaleString()}
 • Date of Birth: ${dob || 'Not provided'}
 • Preferred Contact: ${contactMethod}
 
-📸 CUSTOMER PHOTO:
-Status: ${photoStatus}
-${photoData !== 'Not uploaded' ? `Data: ${photoData}` : 'No photo uploaded'}
+${photoInstructions}
 
 ✍️ CUSTOMER SIGNATURE:
 Status: ${signatureStatus}
-${signatureData !== 'Not provided' ? `Data: ${signatureData}` : 'No signature provided'}
+${signatureData !== 'Not provided' ? `
+🖊️ SIGNATURE PROCESSING:
+1. Copy the signature data URL below
+2. Paste it in a new browser tab to view
+3. Right-click and save for records
+
+✍️ SIGNATURE DATA (Copy this entire line):
+${signatureData}
+
+` : 'No signature provided'}
 
 📝 PROCESSING INSTRUCTIONS:
-${photoData !== 'Not uploaded' || signatureData !== 'Not provided' ? `
-1. VIEWING IMAGES:
-   - Copy the data URL (starts with "data:image/")
-   - Paste it in your browser address bar
-   - Press Enter to view the image
+${window.uploadedPhotoData || signatureData !== 'Not provided' ? `
+✅ LOYALTY CARD PRODUCTION STEPS:
+1. Use the customer photo above for card printing
+2. Generate unique loyalty card ID number
+3. Print physical loyalty card with photo
+4. Email the card ID to customer: ${email}
+5. Update customer database with card details
+6. File signature for records
 
-2. SAVING IMAGES:
-   - Right-click on the displayed image
-   - Select "Save image as..."
-   - Save to your loyalty card processing folder
-
-3. PROCESSING:
-   - Use the saved photo for the loyalty card
-   - Keep the signature for records
-   - Send confirmation email to customer` : `
-⚠️ NOTE: Customer did not upload photo or signature
-Please contact customer to complete registration.`}
+💡 TIP: The photo is optimized for printing and ready to use!` : `
+⚠️ INCOMPLETE REGISTRATION:
+Customer did not upload photo or signature.
+Please contact customer at ${phone} or ${email} to complete registration.`}
 
 ✅ NEXT STEPS:
 1. Process loyalty card with customer photo
@@ -908,6 +969,7 @@ Please contact customer to complete registration.`}
             // Reset photo
             document.getElementById('photoPreview').classList.add('hidden');
             document.getElementById('photoUploadPrompt').classList.remove('hidden');
+            window.uploadedPhotoData = null;
             
             // Clear signature
             clearSignature();
@@ -924,5 +986,5 @@ Please contact customer to complete registration.`}
             showHomepage();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96b5c4db24f78362',t:'MTc1NDU1OTE3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96b5d0efc330ab62',t:'MTc1NDU1OTY2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
