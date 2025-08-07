@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JMB PRINTING SERVICES - Loyalty Card Registration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .step-indicator {
+            transition: all 0.3s ease;
+        }
+        .step-active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        .step-completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        .step-inactive {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        .signature-pad {
+            border: 2px dashed #d1d5db;
+            cursor: crosshair;
+        }
+        .photo-upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .photo-upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        .form-section {
+            display: none;
+        }
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Homepage View -->
+        <div id="homepage" class="homepage-section">
+            <!-- Hero Section -->
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-bold text-gray-800 mb-4">JMB PRINTING SERVICES</h1>
+                <p class="text-xl text-gray-600 mb-8">Your Premier Printing Solutions Partner</p>
+                <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                    <div class="grid md:grid-cols-3 gap-8 mb-8">
+                        <div class="text-center">
+                            <div class="text-4xl mb-4">🖨️</div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Professional Printing</h3>
+                            <p class="text-gray-600">High-quality business cards, flyers, banners, and more</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl mb-4">⚡</div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Fast Turnaround</h3>
+                            <p class="text-gray-600">Quick delivery without compromising on quality</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl mb-4">💎</div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Premium Quality</h3>
+                            <p class="text-gray-600">State-of-the-art equipment and materials</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loyalty Program Section -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white mb-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold mb-4">🎉 JOIN OUR LOYALTY PROGRAM</h2>
+                    <p class="text-xl mb-6">Earn rewards with every purchase and enjoy exclusive benefits!</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <div class="bg-white bg-opacity-20 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-4">💰 Earn Points</h3>
+                        <ul class="space-y-2">
+                            <li>• 1 point for every ₱1 spent</li>
+                            <li>• Bonus points on bulk orders</li>
+                            <li>• Double points on your birthday</li>
+                            <li>• Special promotional bonuses</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-4">🎁 Redeem Rewards</h3>
+                        <ul class="space-y-2">
+                            <li>• 100 points = ₱10 discount</li>
+                            <li>• Free design consultations</li>
+                            <li>• Priority processing</li>
+                            <li>• Exclusive member pricing</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button onclick="showRegistration()" class="bg-white text-blue-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg">
+                        GET YOUR LOYALTY CARD NOW →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Services & Pricing Section -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 text-center mb-8">Our Services & Pricing</h2>
+                
+                <!-- Service Categories -->
+                <div class="grid md:grid-cols-4 gap-6 mb-8">
+                    <div class="text-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                        <div class="text-3xl mb-3">🆔</div>
+                        <h4 class="font-semibold text-gray-800 mb-2">ID Services</h4>
+                        <p class="text-sm text-gray-600">Rush ID printing and PVC cards</p>
+                    </div>
+                    <div class="text-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                        <div class="text-3xl mb-3">📸</div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Photo Printing</h4>
+                        <p class="text-sm text-gray-600">High-quality photo prints in various sizes</p>
+                    </div>
+                    <div class="text-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                        <div class="text-3xl mb-3">📄</div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Document Printing</h4>
+                        <p class="text-sm text-gray-600">A4, colored, B&W, and specialty printing</p>
+                    </div>
+                    <div class="text-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                        <div class="text-3xl mb-3">🎁</div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Specialty Items</h4>
+                        <p class="text-sm text-gray-600">Business cards, invitations, and souvenirs</p>
+                    </div>
+                </div>
+
+                <!-- Detailed Pricing Table -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 text-center">Complete Price List</h3>
+                    
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- ID Services -->
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <h4 class="font-bold text-blue-600 mb-3 text-center">🆔 ID SERVICES</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>ID RUSH 1</span>
+                                    <span class="font-semibold">₱40</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>ID RUSH 2</span>
+                                    <span class="font-semibold">₱50</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>ID RUSH 3</span>
+                                    <span class="font-semibold">₱55</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>ID RUSH 4</span>
+                                    <span class="font-semibold">₱55</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>ID RUSH 5-8</span>
+                                    <span class="font-semibold">₱65</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>PVC ID ONLY</span>
+                                    <span class="font-semibold">₱50</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>ID LACE</span>
+                                    <span class="font-semibold">₱50</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Photo Printing -->
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <h4 class="font-bold text-purple-600 mb-3 text-center">📸 PHOTO PRINTING</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>PHOTO PRINT 1-2</span>
+                                    <span class="font-semibold">₱70</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>PHOTO PRINT 3</span>
+                                    <span class="font-semibold">₱75</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>PHOTO PRINT 4-6</span>
+                                    <span class="font-semibold">₱85</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>PHOTO PRINT 7,9</span>
+                                    <span class="font-semibold">₱90</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>PHOTO PRINT 8</span>
+                                    <span class="font-semibold">₱60</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>ASA PHOTO</span>
+                                    <span class="font-semibold">₱35</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Document Printing -->
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <h4 class="font-bold text-green-600 mb-3 text-center">📄 DOCUMENT PRINTING</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>A4 (COLORED)</span>
+                                    <span class="font-semibold">₱7</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>A4 (B&W)</span>
+                                    <span class="font-semibold">₱6</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>SHORT (COLORED)</span>
+                                    <span class="font-semibold">₱7</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>SHORT (B&W)</span>
+                                    <span class="font-semibold">₱6</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>LONG (COLORED)</span>
+                                    <span class="font-semibold">₱7</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>LONG (B&W)</span>
+                                    <span class="font-semibold">₱6</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Specialty Services -->
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <h4 class="font-bold text-orange-600 mb-3 text-center">🔧 SPECIALTY SERVICES</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>LAMINATE</span>
+                                    <span class="font-semibold">₱35</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>BOOKBINDING</span>
+                                    <span class="font-semibold">₱100</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>DOC PRINT (w/ PIC) FULL</span>
+                                    <span class="font-semibold">₱20</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>DOC PRINT (w/ PIC) PARTIAL</span>
+                                    <span class="font-semibold">₱15</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>KEYCHAIN</span>
+                                    <span class="font-semibold">₱30</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Business & Marketing -->
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <h4 class="font-bold text-red-600 mb-3 text-center">💼 BUSINESS & MARKETING</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>BUSINESS CARD</span>
+                                    <span class="font-semibold">₱200</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>INVITATION</span>
+                                    <span class="font-semibold">₱200</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>PERSONALIZED ENVELOPES</span>
+                                    <span class="font-semibold">₱250</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>SOUVENIRS</span>
+                                    <span class="font-semibold">₱500</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Name Tags & Accessories -->
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <h4 class="font-bold text-teal-600 mb-3 text-center">🏷️ NAME TAGS & ACCESSORIES</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>PVC ID NAME TAGS</span>
+                                    <span class="font-semibold">₱30</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>NAME TAGS (LAMINATE) SMALL</span>
+                                    <span class="font-semibold">₱25</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span>NAME TAGS (LAMINATE) LARGE</span>
+                                    <span class="font-semibold">₱35</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>BAG TAGS</span>
+                                    <span class="font-semibold">₱30</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 text-center">
+                        <p class="text-sm text-gray-600 mb-4">All prices are in Philippine Peso (₱). Bulk orders may qualify for discounts.</p>
+                        <p class="text-xs text-gray-500">Prices subject to change without prior notice. Contact us for custom quotes and bulk pricing.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="bg-gray-50 rounded-2xl p-8 text-center">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Get In Touch</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <div class="text-2xl mb-2">📍</div>
+                        <p class="font-semibold text-gray-800">Visit Us</p>
+                        <p class="text-gray-600">Barangay Balitoc Highway<br>Calatagan, Batangas</p>
+                    </div>
+                    <div>
+                        <div class="text-2xl mb-2">📞</div>
+                        <p class="font-semibold text-gray-800">Call Us</p>
+                        <p class="text-gray-600">09931109148<br>Mon-Sun 8AM-8PM</p>
+                    </div>
+                    <div>
+                        <div class="text-2xl mb-2">✉️</div>
+                        <p class="font-semibold text-gray-800">Email Us</p>
+                        <p class="text-gray-600">jmbprintingservices12@gmail.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Section (Initially Hidden) -->
+        <div id="registrationSection" class="registration-section" style="display: none;">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <button onclick="showHomepage()" class="mb-4 text-blue-600 hover:text-blue-800 font-semibold">← Back to Homepage</button>
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">JMB PRINTING SERVICES</h1>
+                <h2 class="text-2xl font-semibold text-blue-600 mb-4">LOYALTY CARD REGISTRATION</h2>
+                <p class="text-lg text-gray-600">WELCOME! Complete the steps below to get your loyalty card</p>
+            </div>
+
+        <!-- Step Indicator -->
+        <div class="flex justify-center mb-8">
+            <div class="flex space-x-4">
+                <div class="step-indicator step-active rounded-full px-6 py-3 font-semibold text-sm" id="step1-indicator">
+                    STEP 1: DETAILS
+                </div>
+                <div class="step-indicator step-inactive rounded-full px-6 py-3 font-semibold text-sm" id="step2-indicator">
+                    STEP 2: PHOTO
+                </div>
+                <div class="step-indicator step-inactive rounded-full px-6 py-3 font-semibold text-sm" id="step3-indicator">
+                    STEP 3: SIGNATURE
+                </div>
+                <div class="step-indicator step-inactive rounded-full px-6 py-3 font-semibold text-sm" id="step4-indicator">
+                    STEP 4: SUBMIT
+                </div>
+            </div>
+        </div>
+
+            <!-- Registration Form -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+            <!-- Step 1: Details -->
+            <div class="form-section active" id="step1">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Personal Details</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">First Name *</label>
+                        <input type="text" id="firstName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your first name" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name *</label>
+                        <input type="text" id="lastName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your last name" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
+                        <input type="email" id="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your email" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
+                        <input type="tel" id="phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your phone number" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Address *</label>
+                        <textarea id="address" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your full address" required></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Date of Birth</label>
+                        <input type="date" id="dob" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Preferred Contact Method</label>
+                        <select id="contactMethod" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="email">Email</option>
+                            <option value="phone">Phone</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-8">
+                    <button onclick="nextStep(2)" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                        Next: Photo →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Photo -->
+            <div class="form-section" id="step2">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Upload Your Photo</h3>
+                <div class="text-center">
+                    <div class="photo-upload-area rounded-lg p-8 mb-6" id="photoUploadArea">
+                        <div id="photoPreview" class="hidden">
+                            <img id="previewImage" class="mx-auto rounded-lg max-w-xs max-h-64 object-cover mb-4" alt="Photo preview">
+                            <p class="text-green-600 font-semibold">✓ Photo uploaded successfully</p>
+                        </div>
+                        <div id="photoUploadPrompt">
+                            <div class="text-6xl text-gray-400 mb-4">📷</div>
+                            <p class="text-lg font-semibold text-gray-700 mb-2">Upload your photo for the loyalty card</p>
+                            <p class="text-sm text-gray-500 mb-4">JPG, PNG or GIF (max 5MB)</p>
+                            <input type="file" id="photoInput" accept="image/*" class="hidden">
+                            <button onclick="document.getElementById('photoInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                                Choose Photo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="prevStep(1)" class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                        ← Back
+                    </button>
+                    <button onclick="nextStep(3)" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                        Next: Signature →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Signature -->
+            <div class="form-section" id="step3">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Digital Signature</h3>
+                <div class="text-center">
+                    <p class="text-gray-600 mb-4">Please sign in the box below using your mouse or finger</p>
+                    <canvas id="signatureCanvas" class="signature-pad mx-auto bg-gray-50 rounded-lg" width="500" height="200"></canvas>
+                    <div class="mt-4 space-x-4">
+                        <button onclick="clearSignature()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
+                            Clear Signature
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="prevStep(2)" class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                        ← Back
+                    </button>
+                    <button onclick="nextStep(4)" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                        Next: Submit →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Submit -->
+            <div class="form-section" id="step4">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Review & Submit</h3>
+                <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Registration Summary</h4>
+                    <div id="summaryContent" class="space-y-2 text-gray-700">
+                        <!-- Summary will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-start">
+                        <input type="checkbox" id="termsCheckbox" class="mt-1 mr-3">
+                        <label for="termsCheckbox" class="text-sm text-gray-700">
+                            I agree to the terms and conditions of the JMB PRINTING SERVICES loyalty program and consent to the processing of my personal data for loyalty program purposes.
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button onclick="prevStep(3)" class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                        ← Back
+                    </button>
+                    <button onclick="submitRegistration()" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                        Submit Registration ✓
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+                <div class="text-6xl text-green-500 mb-4">✅</div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Registration Successful!</h3>
+                <p class="text-gray-600 mb-6">Your loyalty card registration has been submitted successfully. You will receive your loyalty card ID via email within 24 hours.</p>
+                <div class="bg-gray-100 rounded-lg p-4 mb-6">
+                    <p class="text-sm text-gray-600">Reference ID:</p>
+                    <p class="text-lg font-bold text-blue-600" id="referenceId">JMB-2024-001234</p>
+                </div>
+                <button onclick="resetForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                    Register Another Card
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let isDrawing = false;
+        let signatureCanvas = null;
+        let signatureCtx = null;
+
+        // Initialize signature canvas
+        document.addEventListener('DOMContentLoaded', function() {
+            signatureCanvas = document.getElementById('signatureCanvas');
+            signatureCtx = signatureCanvas.getContext('2d');
+            
+            // Set up signature canvas
+            signatureCtx.strokeStyle = '#000';
+            signatureCtx.lineWidth = 2;
+            signatureCtx.lineCap = 'round';
+            
+            // Mouse events
+            signatureCanvas.addEventListener('mousedown', startDrawing);
+            signatureCanvas.addEventListener('mousemove', draw);
+            signatureCanvas.addEventListener('mouseup', stopDrawing);
+            signatureCanvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            signatureCanvas.addEventListener('touchstart', handleTouch);
+            signatureCanvas.addEventListener('touchmove', handleTouch);
+            signatureCanvas.addEventListener('touchend', stopDrawing);
+            
+            // Photo upload
+            document.getElementById('photoInput').addEventListener('change', handlePhotoUpload);
+        });
+
+        function nextStep(step) {
+            if (validateCurrentStep()) {
+                updateStepIndicator(step);
+                showStep(step);
+                currentStep = step;
+                
+                if (step === 4) {
+                    populateSummary();
+                }
+            }
+        }
+
+        function prevStep(step) {
+            updateStepIndicator(step);
+            showStep(step);
+            currentStep = step;
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`step${step}`).classList.add('active');
+        }
+
+        function updateStepIndicator(step) {
+            for (let i = 1; i <= 4; i++) {
+                const indicator = document.getElementById(`step${i}-indicator`);
+                indicator.classList.remove('step-active', 'step-completed', 'step-inactive');
+                
+                if (i < step) {
+                    indicator.classList.add('step-completed');
+                } else if (i === step) {
+                    indicator.classList.add('step-active');
+                } else {
+                    indicator.classList.add('step-inactive');
+                }
+            }
+        }
+
+        function validateCurrentStep() {
+            if (currentStep === 1) {
+                const required = ['firstName', 'lastName', 'email', 'phone', 'address'];
+                for (let field of required) {
+                    const element = document.getElementById(field);
+                    if (!element.value.trim()) {
+                        element.focus();
+                        element.classList.add('border-red-500');
+                        setTimeout(() => element.classList.remove('border-red-500'), 3000);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('photoPreview').classList.remove('hidden');
+                    document.getElementById('photoUploadPrompt').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = signatureCanvas.getBoundingClientRect();
+            signatureCtx.beginPath();
+            signatureCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = signatureCanvas.getBoundingClientRect();
+            signatureCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            signatureCtx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                            e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            signatureCanvas.dispatchEvent(mouseEvent);
+        }
+
+        function clearSignature() {
+            signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+        }
+
+        function populateSummary() {
+            const summary = document.getElementById('summaryContent');
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            
+            summary.innerHTML = `
+                <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Phone:</strong> ${phone}</p>
+                <p><strong>Address:</strong> ${address}</p>
+                <p><strong>Photo:</strong> ${document.getElementById('photoPreview').classList.contains('hidden') ? 'Not uploaded' : 'Uploaded ✓'}</p>
+                <p><strong>Signature:</strong> Provided ✓</p>
+            `;
+        }
+
+        function submitRegistration() {
+            const termsCheckbox = document.getElementById('termsCheckbox');
+            if (!termsCheckbox.checked) {
+                alert('Please accept the terms and conditions to continue.');
+                return;
+            }
+
+            // Generate reference ID
+            const refId = 'JMB-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 900000 + 100000);
+            document.getElementById('referenceId').textContent = refId;
+            
+            // Get customer details
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const customerEmail = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            const dob = document.getElementById('dob').value;
+            const contactMethod = document.getElementById('contactMethod').value;
+            
+            // Auto-submit to business email
+            sendRegistrationToBusinessEmail(refId, firstName, lastName, customerEmail, phone, address, dob, contactMethod);
+            
+            // Send confirmation email to customer
+            sendEmailCopyToCustomer(customerEmail, refId);
+            
+            // Show success modal
+            document.getElementById('successModal').classList.remove('hidden');
+            document.getElementById('successModal').classList.add('flex');
+            
+            // Redirect to Facebook profile after 5 seconds
+            setTimeout(() => {
+                window.open('https://web.facebook.com/profile.php?id=', '_blank');
+            }, 5000);
+        }
+
+        function sendRegistrationToBusinessEmail(refId, firstName, lastName, email, phone, address, dob, contactMethod) {
+            // Create email subject and body for business
+            const subject = `New Loyalty Card Registration - ${firstName} ${lastName} (${refId})`;
+            const body = `NEW LOYALTY CARD REGISTRATION
+            
+Reference ID: ${refId}
+Registration Date: ${new Date().toLocaleString()}
+
+CUSTOMER DETAILS:
+- Name: ${firstName} ${lastName}
+- Email: ${email}
+- Phone: ${phone}
+- Address: ${address}
+- Date of Birth: ${dob || 'Not provided'}
+- Preferred Contact: ${contactMethod}
+
+Photo: ${document.getElementById('photoPreview').classList.contains('hidden') ? 'Not uploaded' : 'Uploaded'}
+Signature: Provided
+
+Please process this loyalty card registration.
+
+---
+JMB PRINTING SERVICES
+Loyalty Card System`;
+
+            // Create mailto link for automatic email submission
+            const mailtoLink = `mailto:jmbprintingservices12@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Auto-open email client
+            window.open(mailtoLink, '_blank');
+            
+            // Also log the registration data
+            console.log('Registration submitted to business email:', {
+                refId,
+                firstName,
+                lastName,
+                email,
+                phone,
+                address,
+                dob,
+                contactMethod,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        function sendEmailCopyToCustomer(email, referenceId) {
+            // In a real application, this would send an actual email
+            // For demo purposes, we'll show a confirmation message
+            
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            
+            // Create email content
+            const emailContent = {
+                to: email,
+                subject: 'JMB PRINTING SERVICES - Loyalty Card Registration Confirmation',
+                body: `
+                    Dear ${firstName} ${lastName},
+                    
+                    Thank you for registering for the JMB PRINTING SERVICES Loyalty Card!
+                    
+                    Your registration details:
+                    - Reference ID: ${referenceId}
+                    - Name: ${firstName} ${lastName}
+                    - Email: ${email}
+                    - Registration Date: ${new Date().toLocaleDateString()}
+                    
+                    Your loyalty card will be processed within 24 hours and you will receive your card ID via email.
+                    
+                    Thank you for choosing JMB PRINTING SERVICES!
+                    
+                    Best regards,
+                    JMB PRINTING SERVICES Team
+                `
+            };
+            
+            // Log email content (in real app, this would be sent via email service)
+            console.log('Email sent to customer:', emailContent);
+            
+            // Show email confirmation in the UI
+            setTimeout(() => {
+                const emailConfirmation = document.createElement('div');
+                emailConfirmation.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4';
+                emailConfirmation.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="text-green-500 mr-2">📧</span>
+                        <span>Confirmation email sent to ${email}</span>
+                    </div>
+                `;
+                
+                const modal = document.querySelector('#successModal .bg-white');
+                const referenceDiv = modal.querySelector('.bg-gray-100');
+                referenceDiv.parentNode.insertBefore(emailConfirmation, referenceDiv.nextSibling);
+            }, 1000);
+        }
+
+        function showRegistration() {
+            document.getElementById('homepage').style.display = 'none';
+            document.getElementById('registrationSection').style.display = 'block';
+        }
+
+        function showHomepage() {
+            document.getElementById('registrationSection').style.display = 'none';
+            document.getElementById('homepage').style.display = 'block';
+        }
+
+        function resetForm() {
+            // Hide modal
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('successModal').classList.remove('flex');
+            
+            // Reset form
+            document.querySelectorAll('input, textarea, select').forEach(element => {
+                element.value = '';
+            });
+            
+            // Reset photo
+            document.getElementById('photoPreview').classList.add('hidden');
+            document.getElementById('photoUploadPrompt').classList.remove('hidden');
+            
+            // Clear signature
+            clearSignature();
+            
+            // Reset to step 1
+            currentStep = 1;
+            updateStepIndicator(1);
+            showStep(1);
+            
+            // Uncheck terms
+            document.getElementById('termsCheckbox').checked = false;
+            
+            // Return to homepage
+            showHomepage();
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96b56dda9101fcde',t:'MTc1NDU1NTYwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
