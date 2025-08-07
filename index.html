@@ -86,7 +86,7 @@
                     <div class="bg-white bg-opacity-20 rounded-lg p-6">
                         <h3 class="text-xl font-semibold mb-4">💰 Earn Points</h3>
                         <ul class="space-y-2">
-                            <li>• 1 point for every ₱1 spent</li>
+                            <li>• 1 point for every ₱100 spent</li>
                             <li>• Bonus points on bulk orders</li>
                             <li>• Double points on your birthday</li>
                             <li>• Special promotional bonuses</li>
@@ -571,12 +571,12 @@
             document.querySelectorAll('.form-section').forEach(section => {
                 section.classList.remove('active');
             });
-            document.getElementById(`step${step}`).classList.add('active');
+            document.getElementById(`step₱{step}`).classList.add('active');
         }
 
         function updateStepIndicator(step) {
             for (let i = 1; i <= 4; i++) {
-                const indicator = document.getElementById(`step${i}-indicator`);
+                const indicator = document.getElementById(`step₱{i}-indicator`);
                 indicator.classList.remove('step-active', 'step-completed', 'step-inactive');
                 
                 if (i < step) {
@@ -660,11 +660,11 @@
             const address = document.getElementById('address').value;
             
             summary.innerHTML = `
-                <p><strong>Name:</strong> ${firstName} ${lastName}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Phone:</strong> ${phone}</p>
-                <p><strong>Address:</strong> ${address}</p>
-                <p><strong>Photo:</strong> ${document.getElementById('photoPreview').classList.contains('hidden') ? 'Not uploaded' : 'Uploaded ✓'}</p>
+                <p><strong>Name:</strong> ₱{firstName} ₱{lastName}</p>
+                <p><strong>Email:</strong> ₱{email}</p>
+                <p><strong>Phone:</strong> ₱{phone}</p>
+                <p><strong>Address:</strong> ₱{address}</p>
+                <p><strong>Photo:</strong> ₱{document.getElementById('photoPreview').classList.contains('hidden') ? 'Not uploaded' : 'Uploaded ✓'}</p>
                 <p><strong>Signature:</strong> Provided ✓</p>
             `;
         }
@@ -706,32 +706,53 @@
         }
 
         function sendRegistrationToBusinessEmail(refId, firstName, lastName, email, phone, address, dob, contactMethod) {
+            // Get photo data
+            let photoData = 'Not uploaded';
+            const previewImage = document.getElementById('previewImage');
+            if (!document.getElementById('photoPreview').classList.contains('hidden') && previewImage.src) {
+                photoData = previewImage.src; // This contains the base64 data URL
+            }
+            
+            // Get signature data
+            let signatureData = 'Not provided';
+            if (signatureCanvas) {
+                signatureData = signatureCanvas.toDataURL(); // Convert canvas to base64 data URL
+            }
+            
             // Create email subject and body for business
-            const subject = `New Loyalty Card Registration - ${firstName} ${lastName} (${refId})`;
+            const subject = `New Loyalty Card Registration - ₱{firstName} ₱{lastName} (₱{refId})`;
             const body = `NEW LOYALTY CARD REGISTRATION
             
-Reference ID: ${refId}
-Registration Date: ${new Date().toLocaleString()}
+Reference ID: ₱{refId}
+Registration Date: ₱{new Date().toLocaleString()}
 
 CUSTOMER DETAILS:
-- Name: ${firstName} ${lastName}
-- Email: ${email}
-- Phone: ${phone}
-- Address: ${address}
-- Date of Birth: ${dob || 'Not provided'}
-- Preferred Contact: ${contactMethod}
+- Name: ₱{firstName} ₱{lastName}
+- Email: ₱{email}
+- Phone: ₱{phone}
+- Address: ₱{address}
+- Date of Birth: ₱{dob || 'Not provided'}
+- Preferred Contact: ₱{contactMethod}
 
-Photo: ${document.getElementById('photoPreview').classList.contains('hidden') ? 'Not uploaded' : 'Uploaded'}
-Signature: Provided
+PHOTO DATA:
+₱{photoData}
+
+SIGNATURE DATA:
+₱{signatureData}
 
 Please process this loyalty card registration.
+
+INSTRUCTIONS:
+1. Copy the photo data URL and paste it in a browser address bar to view the photo
+2. Copy the signature data URL and paste it in a browser address bar to view the signature
+3. Right-click on the images to save them to your computer
 
 ---
 JMB PRINTING SERVICES
 Loyalty Card System`;
 
             // Create mailto link for automatic email submission
-            const mailtoLink = `mailto:jmbprintingservices12@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            const mailtoLink = `mailto:jmbprintingservices12@gmail.com?subject=₱{encodeURIComponent(subject)}&body=₱{encodeURIComponent(body)}`;
             
             // Auto-open email client
             window.open(mailtoLink, '_blank');
@@ -746,6 +767,8 @@ Loyalty Card System`;
                 address,
                 dob,
                 contactMethod,
+                photoData: photoData !== 'Not uploaded' ? 'Photo included' : 'No photo',
+                signatureData: signatureData !== 'Not provided' ? 'Signature included' : 'No signature',
                 timestamp: new Date().toISOString()
             });
         }
@@ -762,15 +785,15 @@ Loyalty Card System`;
                 to: email,
                 subject: 'JMB PRINTING SERVICES - Loyalty Card Registration Confirmation',
                 body: `
-                    Dear ${firstName} ${lastName},
+                    Dear ₱{firstName} ₱{lastName},
                     
                     Thank you for registering for the JMB PRINTING SERVICES Loyalty Card!
                     
                     Your registration details:
-                    - Reference ID: ${referenceId}
-                    - Name: ${firstName} ${lastName}
-                    - Email: ${email}
-                    - Registration Date: ${new Date().toLocaleDateString()}
+                    - Reference ID: ₱{referenceId}
+                    - Name: ₱{firstName} ₱{lastName}
+                    - Email: ₱{email}
+                    - Registration Date: ₱{new Date().toLocaleDateString()}
                     
                     Your loyalty card will be processed within 24 hours and you will receive your card ID via email.
                     
@@ -791,7 +814,7 @@ Loyalty Card System`;
                 emailConfirmation.innerHTML = `
                     <div class="flex items-center">
                         <span class="text-green-500 mr-2">📧</span>
-                        <span>Confirmation email sent to ${email}</span>
+                        <span>Confirmation email sent to ₱{email}</span>
                     </div>
                 `;
                 
@@ -840,5 +863,5 @@ Loyalty Card System`;
             showHomepage();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96b56dda9101fcde',t:'MTc1NDU1NTYwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF₱cv₱params={r:'96b5bab69658600b',t:'MTc1NDU1ODc1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
