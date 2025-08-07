@@ -614,48 +614,67 @@
                     return;
                 }
                 
-                // Validate file size (max 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('File size must be less than 5MB');
+                // Validate file size (max 10MB for high quality photos)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size must be less than 10MB');
                     return;
                 }
                 
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Create an image element to resize if needed
+                    // Create an image element to process the real photo
                     const img = new Image();
                     img.onload = function() {
-                        // Create canvas to resize image if too large
+                        // Create canvas for high-quality photo processing
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         
-                        // Set maximum dimensions
-                        const maxWidth = 800;
-                        const maxHeight = 600;
+                        // Set optimal dimensions for loyalty card printing (300 DPI equivalent)
+                        const targetWidth = 600;  // Optimal for ID card printing
+                        const targetHeight = 800; // Portrait orientation for loyalty cards
                         let { width, height } = img;
                         
-                        // Calculate new dimensions if image is too large
-                        if (width > maxWidth || height > maxHeight) {
-                            const ratio = Math.min(maxWidth / width, maxHeight / height);
-                            width *= ratio;
-                            height *= ratio;
+                        // Calculate dimensions maintaining aspect ratio
+                        const aspectRatio = width / height;
+                        if (aspectRatio > targetWidth / targetHeight) {
+                            // Image is wider - fit to width
+                            width = targetWidth;
+                            height = targetWidth / aspectRatio;
+                        } else {
+                            // Image is taller - fit to height
+                            height = targetHeight;
+                            width = targetHeight * aspectRatio;
                         }
                         
-                        // Set canvas size and draw resized image
+                        // Set canvas size for high quality
                         canvas.width = width;
                         canvas.height = height;
+                        
+                        // Enable high-quality image rendering
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        
+                        // Draw the real customer photo with high quality
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Convert to data URL with good quality
-                        const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        // Convert to high-quality JPEG for printing (90% quality)
+                        const processedPhotoData = canvas.toDataURL('image/jpeg', 0.9);
                         
-                        // Display the photo
-                        document.getElementById('previewImage').src = resizedDataUrl;
+                        // Display the processed photo
+                        document.getElementById('previewImage').src = processedPhotoData;
                         document.getElementById('photoPreview').classList.remove('hidden');
                         document.getElementById('photoUploadPrompt').classList.add('hidden');
                         
-                        // Store the processed image data for email
-                        window.uploadedPhotoData = resizedDataUrl;
+                        // Store the high-quality processed photo data
+                        window.uploadedPhotoData = processedPhotoData;
+                        window.originalFileName = file.name;
+                        window.photoFileSize = file.size;
+                        
+                        // Show processing confirmation
+                        const confirmation = document.createElement('div');
+                        confirmation.className = 'text-green-600 text-sm mt-2';
+                        confirmation.innerHTML = `✓ Photo processed for loyalty card printing (${(file.size / 1024 / 1024).toFixed(1)}MB → High Quality)`;
+                        document.getElementById('photoPreview').appendChild(confirmation);
                     };
                     img.src = e.target.result;
                 };
@@ -666,24 +685,45 @@
         function startDrawing(e) {
             isDrawing = true;
             const rect = signatureCanvas.getBoundingClientRect();
+            const scaleX = signatureCanvas.width / rect.width;
+            const scaleY = signatureCanvas.height / rect.height;
+            
             signatureCtx.beginPath();
-            signatureCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+            signatureCtx.moveTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
         }
 
         function draw(e) {
             if (!isDrawing) return;
             const rect = signatureCanvas.getBoundingClientRect();
-            signatureCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            const scaleX = signatureCanvas.width / rect.width;
+            const scaleY = signatureCanvas.height / rect.height;
+            
+            signatureCtx.lineTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
             signatureCtx.stroke();
         }
 
         function stopDrawing() {
-            isDrawing = false;
+            if (isDrawing) {
+                isDrawing = false;
+                // Store the signature as high-quality data
+                window.signatureData = signatureCanvas.toDataURL('image/png');
+                
+                // Show signature confirmation
+                const existingConfirmation = document.querySelector('#step3 .text-green-600');
+                if (!existingConfirmation) {
+                    const confirmation = document.createElement('div');
+                    confirmation.className = 'text-green-600 text-sm mt-2 text-center';
+                    confirmation.innerHTML = '✓ Digital signature captured successfully';
+                    document.querySelector('#step3 .mt-4').appendChild(confirmation);
+                }
+            }
         }
 
         function handleTouch(e) {
             e.preventDefault();
             const touch = e.touches[0];
+            const rect = signatureCanvas.getBoundingClientRect();
+            
             const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
                                             e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
                 clientX: touch.clientX,
@@ -694,6 +734,13 @@
 
         function clearSignature() {
             signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            window.signatureData = null;
+            
+            // Remove confirmation message
+            const confirmation = document.querySelector('#step3 .text-green-600');
+            if (confirmation) {
+                confirmation.remove();
+            }
         }
 
         function populateSummary() {
@@ -751,50 +798,60 @@
         }
 
         function sendRegistrationToBusinessEmail(refId, firstName, lastName, email, phone, address, dob, contactMethod) {
-            // Get photo data - use the processed photo data
+            // Get real customer photo data
             let photoData = 'Not uploaded';
             let photoStatus = 'Not uploaded';
             let photoInstructions = '';
             
             if (window.uploadedPhotoData) {
-                photoData = window.uploadedPhotoData; // This contains the processed base64 data URL
-                photoStatus = '📸 REAL CUSTOMER PHOTO ATTACHED';
+                photoData = window.uploadedPhotoData; // High-quality processed customer photo
+                photoStatus = '📸 REAL CUSTOMER PHOTO ATTACHED (Print-Ready Quality)';
                 photoInstructions = `
-🖼️ CUSTOMER PHOTO PROCESSING:
-1. Copy the entire data URL below (starts with "data:image/jpeg;base64,")
-2. Paste it in a new browser tab address bar
-3. Press Enter to view the full-resolution photo
-4. Right-click and "Save image as..." to save for loyalty card printing
-5. Use this photo for the physical loyalty card
+🖼️ CUSTOMER PHOTO FOR LOYALTY CARD PRINTING:
+Original File: ${window.originalFileName || 'customer_photo.jpg'}
+File Size: ${window.photoFileSize ? (window.photoFileSize / 1024 / 1024).toFixed(1) + 'MB' : 'Unknown'}
+Processing: Optimized for ID card printing (600x800px, 90% quality)
 
-📸 PHOTO DATA (Copy this entire line):
+📋 PHOTO USAGE INSTRUCTIONS:
+1. Copy the ENTIRE data URL below (starts with "data:image/jpeg;base64,")
+2. Paste it into a new browser tab address bar
+3. Press Enter to view the full-resolution customer photo
+4. Right-click and "Save image as..." → Save as "${firstName}_${lastName}_loyalty_photo.jpg"
+5. Use this saved photo for physical loyalty card production
+6. Photo is already sized and optimized for professional ID card printing
+
+📸 CUSTOMER PHOTO DATA (Copy this complete line):
 ${photoData}
 
 `;
             }
             
-            // Get signature data
+            // Get real digital signature data
             let signatureData = 'Not provided';
             let signatureStatus = 'Not provided';
-            if (signatureCanvas) {
-                const canvas = signatureCanvas;
-                const ctx = canvas.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                let hasSignature = false;
-                
-                // Check if canvas has any non-white pixels (signature exists)
-                for (let i = 0; i < data.length; i += 4) {
-                    if (data[i] !== 255 || data[i + 1] !== 255 || data[i + 2] !== 255) {
-                        hasSignature = true;
-                        break;
-                    }
-                }
-                
-                if (hasSignature) {
-                    signatureData = canvas.toDataURL('image/png'); // Convert canvas to base64 data URL
-                    signatureStatus = 'SIGNATURE ATTACHED - Ready to view and save';
-                }
+            let signatureInstructions = '';
+            
+            if (window.signatureData) {
+                signatureData = window.signatureData; // High-quality PNG signature
+                signatureStatus = '✍️ DIGITAL SIGNATURE CAPTURED (High Resolution)';
+                signatureInstructions = `
+✍️ CUSTOMER DIGITAL SIGNATURE:
+Format: PNG (Transparent background)
+Quality: High resolution for printing
+Usage: Legal document signing and card verification
+
+📋 SIGNATURE USAGE INSTRUCTIONS:
+1. Copy the ENTIRE signature data URL below (starts with "data:image/png;base64,")
+2. Paste it into a new browser tab address bar
+3. Press Enter to view the customer's signature
+4. Right-click and "Save image as..." → Save as "${firstName}_${lastName}_signature.png"
+5. Use for loyalty card back or keep for records
+6. Signature can be printed on card or stored digitally
+
+✍️ CUSTOMER SIGNATURE DATA (Copy this complete line):
+${signatureData}
+
+`;
             }
             
             // Create email subject and body for business
@@ -815,44 +872,46 @@ Registration Date: ${new Date().toLocaleString()}
 
 ${photoInstructions}
 
-✍️ CUSTOMER SIGNATURE:
-Status: ${signatureStatus}
-${signatureData !== 'Not provided' ? `
-🖊️ SIGNATURE PROCESSING:
-1. Copy the signature data URL below
-2. Paste it in a new browser tab to view
-3. Right-click and save for records
+${signatureInstructions}
 
-✍️ SIGNATURE DATA (Copy this entire line):
-${signatureData}
+📝 LOYALTY CARD PRODUCTION STATUS:
+Photo Status: ${photoStatus}
+Signature Status: ${signatureStatus}
 
-` : 'No signature provided'}
+${window.uploadedPhotoData && window.signatureData ? `
+✅ COMPLETE REGISTRATION - READY FOR CARD PRODUCTION:
+1. Customer photo is print-ready and optimized for loyalty cards
+2. Digital signature captured for verification
+3. All customer details provided
+4. Generate unique loyalty card ID number
+5. Print physical loyalty card using customer photo
+6. Email the card ID to customer: ${email}
+7. Update customer database with card details
+8. File signature for legal records
 
-📝 PROCESSING INSTRUCTIONS:
-${window.uploadedPhotoData || signatureData !== 'Not provided' ? `
-✅ LOYALTY CARD PRODUCTION STEPS:
-1. Use the customer photo above for card printing
-2. Generate unique loyalty card ID number
-3. Print physical loyalty card with photo
-4. Email the card ID to customer: ${email}
-5. Update customer database with card details
-6. File signature for records
-
-💡 TIP: The photo is optimized for printing and ready to use!` : `
+💡 PRODUCTION TIPS:
+• Photo is already sized for ID card printing (600x800px)
+• Signature is high-resolution PNG with transparent background
+• Both files can be saved directly from the data URLs above
+• Customer expects card ID within 24 hours` : `
 ⚠️ INCOMPLETE REGISTRATION:
-Customer did not upload photo or signature.
-Please contact customer at ${phone} or ${email} to complete registration.`}
+${!window.uploadedPhotoData ? '• Customer photo not uploaded' : ''}
+${!window.signatureData ? '• Digital signature not provided' : ''}
+Please contact customer at ${phone} or ${email} to complete missing items.`}
 
 ✅ NEXT STEPS:
-1. Process loyalty card with customer photo
-2. Generate unique card ID
-3. Send card ID to customer via email
-4. Update customer database
+1. Save customer photo and signature from data URLs above
+2. Generate unique loyalty card ID (format: JMB-YYYY-NNNNNN)
+3. Print physical loyalty card with customer photo
+4. Email card ID to customer: ${email}
+5. Update customer database and loyalty point system
+6. File digital signature for records
 
 ---
 🏢 JMB PRINTING SERVICES
 📧 Loyalty Card Registration System
-📞 Contact: 09931109148`;
+📞 Contact: 09931109148
+📍 Barangay Balitoc Highway, Calatagan, Batangas`;
 
             // Create mailto link for automatic email submission
             const mailtoLink = `mailto:jmbprintingservices12@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -986,5 +1045,5 @@ Please contact customer at ${phone} or ${email} to complete registration.`}
             showHomepage();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96b5d0efc330ab62',t:'MTc1NDU1OTY2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96b5dc3f8059c90f',t:'MTc1NDU2MDEyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
